@@ -97,7 +97,10 @@ curl http://localhost:50021/speakers
 
 - **macOS**: `afplay` コマンドを使用
 - **Linux**: `aplay` コマンドを使用
+- **WSL (Windows Subsystem for Linux)**: `powershell.exe` の `Media.SoundPlayer` を使用（Windows 側スピーカーから出力）
 - **Windows**: PowerShell の `Media.SoundPlayer` を使用
+
+WSL 環境は `/proc/version` の内容から自動判定されるため、追加設定は不要です。
 
 ## トラブルシューティング
 
@@ -118,6 +121,10 @@ curl http://localhost:50021/speakers
 - 音声再生コマンドがインストールされているか確認
   - Linux: `aplay` (alsa-utils)
   - その他のプラットフォームは通常デフォルトで利用可能
+- WSL で音声が出ない場合:
+  - Windows interop が有効か確認（`/proc/sys/fs/binfmt_misc/WSLInterop` が存在するか）
+  - `wslpath` コマンドが使用可能か確認（`wslpath -w /tmp` が動作するか）
+  - VOICEVOX エンジンが Windows 側で起動しているか確認
 
 ## ライセンス
 

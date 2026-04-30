@@ -6,7 +6,7 @@
 
 MCPクライアント（Claude Code、Claude Desktop等）の設定ファイルに以下を追加してください。
 
-#### macOS / Linux / WSL の場合
+#### macOS / Linux の場合
 
 Claude Code CLI:
 
@@ -27,13 +27,45 @@ JSON設定ファイル:
 }
 ```
 
+#### WSL の場合
+
+Claude Code CLI:
+
+```bash
+claude mcp add voicevox -- npx @t09tanaka/mcp-simple-voicevox
+```
+
+JSON設定ファイル:
+
+```json
+{
+  "mcpServers": {
+    "voicevox": {
+      "command": "npx",
+      "args": ["@t09tanaka/mcp-simple-voicevox"]
+    }
+  }
+}
+```
+
+**WSL の前提条件:**
+
+- Windows interop が有効（WSL デフォルト設定で有効）
+- `wslpath` コマンドが使用可能（Windows interop が有効であれば自動的に利用可能）
+- `powershell.exe` が PATH 上に存在する（Windows interop が有効であれば自動的に利用可能）
+- VOICEVOX エンジンが Windows 側で起動している
+
+音声は **Windows 側のスピーカー** から出力されます。WSL 環境は `/proc/version` の内容から自動判定されるため、追加の設定変更は不要です。
+
+````
+
 #### Windows（ネイティブ）の場合
 
 Claude Code CLI:
 
 ```bash
 claude mcp add voicevox -- cmd /c npx @t09tanaka/mcp-simple-voicevox
-```
+````
 
 JSON設定ファイル:
 

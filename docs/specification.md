@@ -71,6 +71,17 @@ VOICEVOXを使用してテキストを音声に変換し、読み上げを行い
 
 VOICEVOXで利用可能な話者IDは、VOICEVOXのAPIエンドポイント `/speakers` から取得できます。
 
+## プラットフォーム別再生バックエンド
+
+| プラットフォーム | 判定方法                                                                        | 再生コマンド                                                                               |
+| ---------------- | ------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------ |
+| macOS            | `process.platform === 'darwin'`                                                 | `afplay <file>`                                                                            |
+| Linux            | `process.platform === 'linux'` かつ非WSL                                        | `aplay <file>`                                                                             |
+| WSL              | `process.platform === 'linux'` かつ `/proc/version` に `microsoft`/`WSL` を含む | `powershell.exe -NoProfile -Command (New-Object Media.SoundPlayer "<winPath>").PlaySync()` |
+| Windows          | `process.platform === 'win32'`                                                  | `powershell -c (New-Object Media.SoundPlayer "<file>").PlaySync()`                         |
+
+WSL では `/tmp` 配下に書き出した一時ファイルを `wslpath -w` で Windows パスへ変換し、`powershell.exe` 経由で Windows 側スピーカーから再生します。WSL の自動判定に環境変数等の追加設定は不要です。
+
 ## 技術仕様
 
 ### MCP Server
