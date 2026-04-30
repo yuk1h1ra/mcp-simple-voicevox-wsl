@@ -1,9 +1,23 @@
+import { readFileSync } from 'fs';
 import axios, { AxiosInstance } from 'axios';
 
 export interface SpeakOptions {
   text: string;
   speaker: number;
   speedScale?: number;
+}
+
+export function detectWsl(procVersionContent: string): boolean {
+  return /microsoft|wsl/i.test(procVersionContent);
+}
+
+export function isWsl(): boolean {
+  if (process.platform !== 'linux') return false;
+  try {
+    return detectWsl(readFileSync('/proc/version', 'utf8'));
+  } catch {
+    return false;
+  }
 }
 
 export class VoicevoxClient {
@@ -69,7 +83,7 @@ export class VoicevoxClient {
   private async playAudio(audioData: ArrayBuffer): Promise<void> {
     const fs = await import('fs');
     const path = await import('path');
-    const { spawn } = await import('child_process');
+    const { spawn, spawnSync } = await import('child_process');
     const os = await import('os');
 
     return new Promise((resolve, reject) => {
@@ -88,8 +102,32 @@ export class VoicevoxClient {
           args = [tempFilePath];
           break;
         case 'linux':
-          command = 'aplay';
-          args = [tempFilePath];
+          if (isWsl()) {
+            const conv = spawnSync('wslpath', ['-w', tempFilePath]);
+            if (conv.status !== 0) {
+              try {
+                fs.unlinkSync(tempFilePath);
+              } catch (e) {
+                console.error('一時ファイルの削除に失敗:', e);
+              }
+              reject(
+                new Error(
+                  `wslpath 変換に失敗: ${conv.stderr?.toString().trim() ?? ''}`
+                )
+              );
+              return;
+            }
+            const winPath = conv.stdout.toString().trim();
+            command = 'powershell.exe';
+            args = [
+              '-NoProfile',
+              '-Command',
+              `(New-Object Media.SoundPlayer "${winPath}").PlaySync()`,
+            ];
+          } else {
+            command = 'aplay';
+            args = [tempFilePath];
+          }
           break;
         case 'win32': // Windows
           command = 'powershell';
